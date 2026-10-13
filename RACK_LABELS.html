@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>RackTrack SCL-AWS </title>
+
+    <!-- ============================================ -->
+    <!-- LIBRERÍAS EXTERNAS (Requieren Internet)     -->
+    <!-- ============================================ -->
+    <!-- QRCode.js: Genera códigos QR dinámicamente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- jsPDF: Crea archivos PDF desde JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* ============================================ */
+        /* SECCIÓN 1: ESTILOS GLOBALES Y RESET         */
+        /* ============================================ */
+        /* Resetea márgenes y padding de todos los elementos */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 2: ESTILOS DEL BODY (Fondo)   #232F3E      */
+        /* ============================================ */
+        body {
+            font-family: 'Amazon Ember', Arial, sans-serif;
+            background: linear-gradient(135deg, #232F3E 0%, #37475A 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 3: CONTENEDOR PRINCIPAL             */
+        /* ============================================ */
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 4: ENCABEZADOS Y TÍTULOS            */
+        /* ============================================ */
+        h1 {
+            color: #232F3E;
+            margin-bottom: 10px;
+            font-size: 38px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 5: FORMULARIO - Contenedor          */
+        /* ============================================ */
+        .form-section {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 6: FORMULARIO - Labels              */
+        /* ============================================ */
+        label {
+            display: block;
+            font-weight: 600;
+            color: #232F3E;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 7: FORMULARIO - Inputs y Selects    */
+        /* ============================================ */
+        select,
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            background: white;
+            cursor: pointer;
+        }
+
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: #EC7211;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 8: LAYOUT - Sistema de Filas        */
+        /* ============================================ */
+        /* Grid de 2 columnas para organizar campos del formulario */
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 9: BOTONES - Contenedor             */
+        /* ============================================ */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 10: BOTONES - Estilos Base          */
+        /* ============================================ */
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 11: BOTÓN PRIMARIO (Vista Previa)   */
+        /* ============================================ */
+        .btn-primary {
+            background: #FF9900;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #EC7211;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 153, 0, 0.3);
+        }
+
+
+        /* ============================================ */
+        /* SECCIÓN 12: BOTÓN PDF                       */
+        /* ============================================ */
+        .btn-pdf {
+            background: #146EB4;
+            color: white;
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            width: 100%;
+            height: fit-content;
+            margin-top: 10px;
+            margin: 8px;
+        }
+
+        .btn-pdf:hover {
+            background: #0F5B94;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+
+        /* ============================================ */
+        /* SECCIÓN 12B: BOTÓN IMPRIMIR                 */
+        /* ============================================ */
+        .btn-print {
+            background: #28a745;
+            color: white;
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            width: 100%;
+            height: fit-content;
+            margin-top: 10px;
+            margin: 8px;
+
+        }
+
+        .btn-print:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 12C: BOTÓN RESTABLECER (Secundario) */
+        /* ============================================ */
+        .btn-reset {
+            background: #6c757d;
+            color: white;
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            width: 100%;
+            height: fit-content;
+            margin-top: 10px;
+            margin: 8px;
+        }
+
+        .btn-reset:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 13: VISTA PREVIA - Contenedor       */
+        /* ============================================ */
+        .preview-section {
+            margin-top: 15px;
+            padding: 25px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .preview-section.active {
+            display: block;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 14: VISTA PREVIA - Título           */
+        /* ============================================ */
+        .preview-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #232F3E;
+
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 15: CONTENEDOR DE ETIQUETAS         */
+        /* ============================================ */
+        .labels-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 16: ITEM DE ETIQUETA (Layout)       */
+        /* ============================================ */
+        /* Cada etiqueta con su botón PDF al lado */
+        .label-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 30px;
+            align-items: center;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 17: CONTENIDO DE ETIQUETA           */
+        /* ============================================ */
+        .label-content {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .side-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #232F3E;
+            margin-bottom: 10px;
+        }
+
+        .label-preview {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 20px;
+            border-radius: 10px;
+            width: 1130px;
+            min-width: 1130px;
+            display: inline-block;
+            box-sizing: border-box;
+
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 18: ETIQUETA - Contenedor Principal */
+        /* ============================================ */
+        /* Proporción exacta: 178mm / 18mm = 9.889:1 */
+        .label-container {
+            width: 1090px;
+            height: 100px;
+            min-width: 988px;
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #ddd;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 19: COLORES POR TIPO DE RACK        */
+        /* ============================================ */
+        /* Color de fondo según el tipo de rack */
+        .label-container.ec2 {
+            background: #FF6B6B;
+        }
+
+        .label-container.prod {
+            background: #51CF66;
+        }
+
+        .label-container.ebs {
+            background: #FFD43B;
+        }
+
+        .label-container.nw-path,
+        .label-container.nw,
+        .label-container.nw_special {
+            background: white;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 20: SECCIÓN DEL QR CODE             */
+        /* ============================================ */
+        /* QR proporcional: 14mm x 14mm */
+        .qr-section {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 8px;
+            flex-shrink: 0;
+            border-right: 3px solid #000;
+            padding-right: 8px;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 21: SECCIÓN DE TEXTO (Normal)       */
+        /* ============================================ */
+        .text-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 22: SECCIÓN DE TEXTO (NW Especial)  */
+        /* ============================================ */
+        /* Formato especial para etiquetas NW con 2 líneas */
+        .text-section.nw-special {
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 8px 20px;
+            position: relative;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 23: TEXTO DE UBICACIÓN (Normal)     */
+        /* ============================================ */
+        .location-text {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 47px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-align: center;
+            line-height: 1;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 24: TEXTO NW - Primera Línea        */
+        /* ============================================ */
+        .location-text-line1 {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 0.8px;
+            text-align: center;
+            line-height: 1;
+            margin-bottom: 3px;
+            width: 100%;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 25: TEXTO NW - Segunda Línea        */
+        /* ============================================ */
+        .location-text-line2 {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 0.8px;
+            text-align: center;
+            line-height: 1;
+            margin-top: 3px;
+            width: 100%;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 26: LÍNEA DIVISORIA (NW)            */
+        /* ============================================ */
+        /* Línea horizontal que separa las dos líneas de texto en NW */
+        .divider-line {
+            width: 100%;
+            height: 3px;
+            background-color: #000;
+            margin: 3px 0;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 27: TIPO DE RED (EC2, PROD, etc)    */
+        /* ============================================ */
+        /* Tipo de red proporcional - ESPACIO AMPLIO */
+        .network-type {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 52px;
+            font-weight: 900;
+            padding: 0 25px;
+            border-left: 3px solid #000;
+            text-align: center;
+            min-width: 170px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 28: QR CODE - Contenedor            */
+        /* ============================================ */
+        .qrcode {
+            width: 78px;
+            height: 78px;
+        }
+
+        .qrcode img {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 29: WRAPPER DEL BOTÓN PDF           */
+        /* ============================================ */
+        .button-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            min-width: 440px;
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 30: RESPONSIVE - Pantallas Pequeñas */
+        /* ============================================ */
+
+        /* Laptops y tablets (menos de 1400px) */
+        @media (max-width: 1700px) {
+            .label-item {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .button-wrapper {
+                width: 100%;
+                min-width: auto;
+                flex-direction: row;
+                justify-content: center;
+                gap: 15px;
+            }
+
+            .btn-pdf,
+            .btn-print {
+                width: auto;
+                flex: auto;
+                min-width: 180px;
+            }
+        }
+
+        /* Móviles pequeños (menos de 768px) */
+        @media (max-width: 768px) {
+            .button-wrapper {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-pdf,
+            .btn-print {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 30B: Footer */
+        /* ============================================ */
+        .page-footer-minimal {
+            margin-top: 30px;
+            padding: 15px;
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .page-footer-minimal strong {
+            color: #FF9900;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ============================================ -->
+    <!-- SECCIÓN 31: ESTRUCTURA HTML - Contenedor    -->
+    <!-- ============================================ -->
+    <div class="container">
+        <h1>🏢 Rack Label Generator - AWS</h1>
+        <p class="subtitle">Label Format: 18mm x 178mm | Sites: SCL & GRU </p>
+        <!-- ============================================ -->
+        <!-- SECCIÓN 32: FORMULARIO PRINCIPAL            -->
+        <!-- ============================================ -->
+        <div class="form-section">
+            <!-- fila: Cluster y Site -->
+            <div class="row">
+                <div class="form-group">
+                    <label>🌎 Cluster</label>
+                    <select id="cluster" onchange="updateSiteOptions()">
+                        <option value="">Select a Cluster</option>
+                        <option value="SCL">SCL - Santiago, Chile</option>
+                        <option value="GRU">GRU - São Paulo, Brazil</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>🏢 Sitio (Site Code)</label>
+                    <select id="site" disabled>
+                        <option value="">First Select a Cluster</option>
+                    </select>
+                </div>
+            </div>
+
+
+            <!-- Fila 1: Edificio y Piso -->
+            <div class="row">
+                <div class="form-group">
+                    <label>Edificio (Building)</label>
+                    <select id="building">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Piso (Floor)</label>
+                    <select id="floor">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Fila 2: Sala y Fila -->
+            <div class="row">
+                <div class="form-group">
+                    <label>Sala (Room)</label>
+                    <select id="room">
+                        <option value="01">01</option>
+                        <option value="02">02</option>
+                        <option value="03">03</option>
+                        <option value="04">04</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Fila (Row)</label>
+                    <select id="row">
+                        <option value="001">001</option>
+                        <option value="002">002</option>
+                        <option value="003">003</option>
+                        <option value="004">004</option>
+                        <option value="005">005</option>
+                        <option value="006">006</option>
+                        <option value="007">007</option>
+                        <option value="008">008</option>
+                        <option value="009">009</option>
+                        <option value="010">010</option>
+                    </select>
+                </div>
+            </div>
+
+
+            <!-- Fila 3: Posición y Lado -->
+            <div class="row">
+                <div class="form-group">
+                    <label>Posición / Position </label>
+                    <select id="position">
+                        <script>
+                            for (let i = 11; i <= 48; i++) {
+                                document.write(`<option value="${String(i).padStart(2, '0')}">${String(i).padStart(2, '0')}</option>`);
+                            }
+                        </script>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Lado / Side </label>
+                    <select id="side">
+                        <option value="A-B">A-B (Both sides - labels A&B)</option>
+                        <option value="A">A (Cold Aisle / Pasillo Frío)</option>
+                        <option value="B">B (Hot Aisle / Pasillo Caliente)</option>
+
+                    </select>
+                </div>
+            </div>
+            <!-- Campo: Tipo de Rack -->
+            <div class="form-group">
+                <label>Tipo de Rack / Rack Type</label>
+                <select id="rackType" onchange="updateRackTypeChange()">
+                    <option value="EC2">EC2 - Elastic Compute Cloud</option>
+                    <option value="PROD">PROD - Production</option>
+                    <option value="EBS">EBS - Elastic Block Store</option>
+                    <option value="NW PATH">NW PATH - Network Path</option>
+                    <!--<option value="NW_SPECIAL">NW - Network (Hostname Lista)</option>-->
+                    <option value="NW">NW - Network (Hostname Manual)</option>
+                </select>
+            </div>
+
+            <!-- Campo condicional: Selector de Rack Especial (solo para NW_Lista) -->
+            <div class="form-group" id="nwSpecialRackGroup" style="display: none;">
+                <label>Select a Network device</label>
+                <select id="nwSpecialRack">
+                    <option value="">-- Select a Rack --</option>
+
+                    <!-- Formato: value="ABREVIATURA" y texto completo visible -->
+                    <option value="WS-E1-B1">BFC12.8T_SPLIT_EVEN_T1_BR_16W_BRIGGS_STRIPE3_NO_OPTICAL</option>
+                    <option value="WS-E1-B2">BFC12.8T_SPLIT_ODD_T1_BR_16W_BRIGGS_STRIPE3_NO_OPTICAL</option>
+                    <option value="WS-E2-B1">CF.BLACKHOLE.16</option>
+                    <option value="WS-E2-B2">CF.LCITWL15K.17C</option>
+                    <option value="WS-E3-B1">EUCLID12.8T-26-8W-MINI-SP-BASE</option>
+                    <option value="WS-E3-B2">EUCLID12.8T-BR-8W-400G-DR4</option>
+                    <option value="WS-E4-B1">EUCLID2.0-PATCH-LEFT</option>
+                    <option value="WS-E4-B2">FPODV2</option>
+                    <option value="WS-E5-B1">GPC.DBMWMW.V3</option>
+                    <option value="WS-E5-B2">INFRA.IRON.CORP</option>
+                    <option value="WS-E6-B1">NW.4LLE.BR.2.0</option>
+                    <option value="WS-E6-B2">NW.BMN_FULL_V2</option>
+                    <option value="WS-E7-B1">NW.CHRONOS</option>
+                    <option value="WS-E7-B2">NW.COMMODITYPUFFIN-S.BF19</option>
+                    <option value="WS-E8-B1">NW.ECLECTUS_EVEN</option>
+                    <option value="WS-E8-B2">NW.ECLECTUS_ODD</option>
+                    <option value="WS-E9-B1">NW.ENTERPRISE_BASE_EVEN_V2</option>
+                    <option value="WS-E9-B2">NW.ENTERPRISE_BASE_ODD_V2</option>
+                    <option value="WS-E10-B1">NW.FUSION_PRIMARY_EVEN_V3</option>
+                    <option value="WS-E10-B2">NW.FUSION_PRIMARY_ODD_V3</option>
+                    <option value="WS-E11-B1">NW.FUSION_SECONDARY_V3</option>
+                    <option value="WS-E11-B2">NW.LBIR.GIB.NG</option>
+                    <option value="WS-E12-B1">NW.LUL_BR.2.1_1-2</option>
+                    <option value="WS-E12-B2">NW.LUL_BR.2.1_2-2</option>
+                    <option value="WS-E13-B1">NW.ONEFABRIC_CORE_12.8T_16W_EVEN_ENCRYPTION</option>
+                    <option value="WS-E13-B2">NW.ONEFABRIC_CORE_12.8T_16W_ODD_ENCRYPTION</option>
+                    <option value="WS-E14-B1">NW.ORINOCO-CIENA-LINE-3.2T-2.0</option>
+                    <option value="WS-E14-B2">NW.PATO_MINI_UNIFIED_EVEN</option>
+                    <option value="WS-E15-B1">NW.PATO_MINI_UNIFIED_ODD</option>
+                    <option value="WS-E15-B2">NW.PHOENIX_HALO_CENTENNIAL_WMW.1.0</option>
+                    <option value="WS-E16-B1">NW.ROCK.1.0-100G-NO-OPTIC</option>
+                    <option value="WS-E16-B2">NW.SKYBRIDGE</option>
+                    <option value="WS-E17-B1">NW.THUNDERACK_TALL</option>
+                    <option value="WS-E17-B2">NW.TIGRIS-CELESTICA-LINE-CIENA-BASE-2.0</option>
+                    <option value="WS-E18-B1">ONEFABRIC-AGG-12.8T-8W-BR</option>
+                    <option value="WS-E18-B2">ONEFABRIC-SP-12.8T-8W-BASE_FULL</option>
+                    <option value="WS-E19-B1">STORM.SIREN</option>
+                </select>
+            </div>
+
+
+            <!-- Campo condicional: Hostname manual (solo para NW) -->
+            <div class="form-group" id="nwHostnameGroup" style="display: none;">
+                <label>Hostname (NW manual format)</label>
+                <input type="text" id="nwHostname" placeholder="Ej: [PARENT]-[CHILD]-[FABRIC]-[COMPONENT]-[IDENTIFIER]
+">
+            </div>
+        </div>
+
+
+        <div class="button-group">
+            <button class="btn-primary" onclick="generatePreview()">👁️ Vista Previa</button>
+
+        </div>
+
+
+    </div>
+    <!-- ============================================ -->
+    <!-- SECCIÓN 33: ÁREA DE VISTA PREVIA            -->
+    <!-- ============================================ -->
+    <div class="preview-section" id="previewSection">
+        <div class="preview-title">Previw:</div>
+        <div class="labels-container" id="labelsContainer">
+            <!-- Las etiquetas se generarán aquí dinámicamente -->
+        </div>
+    </div>
+    </div>
+
+    <script>
+        /* ============================================ */
+        /* SECCIÓN 34: JAVASCRIPT - Función 1          */
+        /* Muestra/Oculta el campo Hostname para NW    */
+        /* ============================================ */
+
+        /* ============================================ */
+        /* SECCIÓN XX: DATOS DE CLUSTERS              */
+        /* ============================================ */
+        const clusterData = {
+            'SCL': {
+                name: 'Santiago, Chile',
+                sites: [
+                    { code: 'SCL60', name: 'SCL60 ', status: 'operational' },
+                    { code: 'SCL61', name: 'SCL61 ', status: 'operational' },
+                    { code: 'SCL62', name: 'SCL62 ', status: 'upcoming' },
+                    { code: 'SCL63', name: 'SCL63', status: 'operational' }
+                ]
+            },
+            'GRU': {
+                name: 'São Paulo, Brasil',
+                sites: [
+                    { code: 'GRU53', name: 'GRU53', status: 'operational' },
+                    { code: 'GRU54', name: 'GRU54', status: 'operational' },
+                    { code: 'GRU63', name: 'GRU63', status: 'operational' },
+                    { code: 'GRU65', name: 'GRU65', status: 'operational' }
+                ]
+            }
+        };
+
+        /* ============================================ */
+        /* FUNCIÓN: Actualizar Sitios según Cluster    */
+        /* ============================================ */
+        function updateSiteOptions() {
+            const clusterSelect = document.getElementById('cluster');
+            const siteSelect = document.getElementById('site');
+            const selectedCluster = clusterSelect.value;
+
+            // Limpiar opciones actuales
+            siteSelect.innerHTML = '<option value="">Select a Site</option>';
+
+            // Si no hay cluster seleccionado, deshabilitar
+            if (!selectedCluster) {
+                siteSelect.disabled = true;
+                return;
+            }
+
+            // Habilitar selector de sitio
+            siteSelect.disabled = false;
+
+            // Obtener datos del cluster
+            const cluster = clusterData[selectedCluster];
+
+            if (cluster && cluster.sites) {
+                // Agregar cada sitio como opción
+                cluster.sites.forEach(site => {
+                    const option = document.createElement('option');
+                    option.value = site.code;
+
+                    // Texto de la opción
+                    let optionText = site.name;
+
+                    // Agregar indicador según estado
+                    if (site.status === 'upcoming') {
+                        optionText += ' 🚧 (Próximo)';
+                        option.disabled = true;  // Deshabilitar sitios próximos
+                    } else if (site.status === 'operational') {
+                        optionText += ' ✅';
+                    }
+
+                    option.textContent = optionText;
+                    siteSelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateRackTypeChange() {
+            const rackType = document.getElementById('rackType').value;
+            const nwHostnameGroup = document.getElementById('nwHostnameGroup');
+            const nwSpecialRackGroup = document.getElementById('nwSpecialRackGroup');
+
+            // Ocultar ambos campos por defecto
+            nwHostnameGroup.style.display = 'none';
+            nwSpecialRackGroup.style.display = 'none';
+
+            // Mostrar el campo correspondiente según el tipo
+            if (rackType === 'NW') {
+                nwHostnameGroup.style.display = 'block';
+            } else if (rackType === 'NW_SPECIAL') {
+                nwSpecialRackGroup.style.display = 'block';
+            }
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 35: JAVASCRIPT - Función 2          */
+        /* Construye el string de ubicación            */
+        /* ============================================ */
+        function getLocationString(side) {
+            // Obtiene todos los valores del formulario
+            const site = document.getElementById('site').value;
+            const building = document.getElementById('building').value;
+            const floor = document.getElementById('floor').value;
+            const room = document.getElementById('room').value;
+            const row = document.getElementById('row').value;
+            const position = document.getElementById('position').value;
+
+            // ✅ FORMATO CORRECTO: SCL63.1-1.01-01-008-70/A
+            // Separadores: PUNTO después de site, GUION después de building, PUNTO después de floor, GUIONES para el resto
+            return `${site}.${building}-${floor}.${room}-${row}-${position}/${side}`;
+        }
+
+
+        /* ============================================ */
+        /* SECCIÓN 36: JAVASCRIPT - Función 3          */
+        /* Genera el HTML de una etiqueta              */
+        /* ============================================ */
+        function generateLabelHTML(location, rackType, nwHostname, labelId) {
+            // Convierte el tipo de rack a clase CSS (ej: "NW PATH" -> "nw-path")
+            const colorClass = rackType.toLowerCase().replace(/ /g, '-');
+
+            let textContent = '';
+            let textSectionClass = 'text-section';
+
+            // ✅ CORRECCIÓN: Incluir NW_SPECIAL en la condición
+            if ((rackType === 'NW' || rackType === 'NW_SPECIAL') && nwHostname) {
+                textSectionClass = 'text-section nw-special';
+                textContent = `
+                    <div class="location-text-line1">${location}</div>
+                    <div class="divider-line"></div>
+                    <div class="location-text-line2">${nwHostname}</div>
+                `;
+            } else {
+                // Formato normal de una sola línea
+                textContent = `<span class="location-text">${location}</span>`;
+            }
+
+            // ✅ CORRECCIÓN: Mostrar "NW" para NW, NW_List y NW PATH
+            const typeText = (rackType === 'NW PATH' || rackType === 'NW' || rackType === 'NW_SPECIAL') ? 'NW' : rackType;
+
+            // Extrae el lado (A o B) del string de ubicación
+            const side = location.split('/')[1];
+
+            // Retorna el HTML completo de la etiqueta
+            return `
+                <div class="label-item">
+                    <div class="label-content">
+                        <div class="side-label">Side: ${side}</div>
+                        <div class="label-preview">
+                            <div class="label-container ${colorClass}">
+                                <div class="qr-section">
+                                    <div class="qrcode" id="qrcode${labelId}"></div>
+                                </div>
+                                <div class="${textSectionClass}">
+                                    ${textContent}
+                                </div>
+                                <div class="network-type">${typeText}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button-wrapper">
+                      <button class="btn-pdf" onclick="generatePDF('${location}', '${rackType}', '${nwHostname}', '${side}')">
+                          📄 Generate PDF Side ${side}
+                      </button>
+                  
+                      <button class="btn-print" onclick="printLabel('${location}', '${rackType}', '${nwHostname}', '${side}')">
+                          🖨️ Print Side ${side}
+                      </button>
+
+                      
+                      <button class="btn-reset" onclick="resetForm()">🔄 Reset</button>
+               
+                    </div>
+
+                </div>
+            `;
+        }
+        /* ============================================ */
+        /* SECCIÓN 37: JAVASCRIPT - Función 4          */
+        /* Genera la vista previa de etiquetas         */
+        /* ============================================ */
+        function generatePreview() {
+            // ========================================
+            // 1. OBTENER VALORES DEL FORMULARIO
+            // ========================================
+            const cluster = document.getElementById('cluster').value;
+            const site = document.getElementById('site').value;
+            const side = document.getElementById('side').value;
+            const rackType = document.getElementById('rackType').value;
+            const nwHostname = document.getElementById('nwHostname').value;
+            const nwSpecialRack = document.getElementById('nwSpecialRack').value;
+
+
+            // ========================================
+            // 2. VALIDACIÓN: CLUSTER Y SITIO
+            // ========================================
+            if (!cluster || !site) {
+                const camposFaltantes = [];
+                if (!cluster) camposFaltantes.push('Cluster');
+                if (!site) camposFaltantes.push('Sitio');
+
+
+                alert('⚠️ Por favor completa los siguientes campos:\n\n' + '⚠️ Please fill in the following fields:\n\n• ' + camposFaltantes.join('\n• '));
+                return;
+            }
+
+            // ========================================
+            // 3. VALIDACIÓN: SI ES NW Y NO HAY HOSTNAME
+            // ========================================
+            if (rackType === 'NW' && !nwHostname) {
+                alert('⚠️ Por favor ingresa un Hostname para el formato NW:\n\n⚠️ Please enter a Hostname for the NW format NW: \n\n (Ej: PARENT-CHILD-FABRIC-COMPONENT-IDENTIFIER)');
+                return;
+            }
+
+            // ========================================
+            // 3B. VALIDACIÓN: SI ES NW_SPECIAL Y NO HAY SELECCIÓN
+            // ========================================
+            if (rackType === 'NW_SPECIAL' && !nwSpecialRack) {
+                alert('⚠️ Por favor selecciona un Rack Especial de la lista');
+                return;
+            }
+
+            // ========================================
+            // 4. DETERMINAR HOSTNAME A USAR
+            // ========================================
+            let finalHostname;
+
+            if (rackType === 'NW_SPECIAL') {
+                // ✅ Formato: SITE + guion + ABREVIATURA (del value)
+                // Ejemplo: GRU65-WS-E1-B1
+                finalHostname = `${site}-${nwSpecialRack}`;
+            } else {
+                // Para NW manual, usar el hostname tal cual
+                finalHostname = nwHostname;
+            }
+
+            // ========================================
+            // 5. LIMPIAR CONTENEDOR
+            // ========================================
+            const container = document.getElementById('labelsContainer');
+            container.innerHTML = '';  // Limpia el contenido anterior
+
+            // ========================================
+            // 6. GENERAR ETIQUETAS SEGÚN EL LADO
+            // ========================================
+            if (side === 'A-B') {
+                // Generar dos etiquetas
+                const locationA = getLocationString('A');
+                const locationB = getLocationString('B');
+
+                // ✅ CORRECCIÓN: Usar finalHostname en lugar de nwHostname
+                container.innerHTML = generateLabelHTML(locationA, rackType, finalHostname, 'A') +
+                    generateLabelHTML(locationB, rackType, finalHostname, 'B');
+
+                // Generar QR codes
+                setTimeout(() => {
+                    new QRCode(document.getElementById('qrcodeA'), {
+                        text: locationA,
+                        width: 78,
+                        height: 78,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+
+                    new QRCode(document.getElementById('qrcodeB'), {
+                        text: locationB,
+                        width: 78,
+                        height: 78,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                }, 100);
+
+            } else {
+                // Genera una sola etiqueta (lado A o B)
+                const location = getLocationString(side);
+
+                // ✅ CORRECCIÓN: Usar finalHostname en lugar de nwHostname
+                container.innerHTML = generateLabelHTML(location, rackType, finalHostname, 'single');
+
+                // Generar QR code
+                setTimeout(() => {
+                    new QRCode(document.getElementById('qrcodesingle'), {
+                        text: location,
+                        width: 78,
+                        height: 78,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                }, 100);
+            }
+
+            // ========================================
+            // 7. MOSTRAR PREVIEW
+            // ========================================
+            document.getElementById('previewSection').classList.add('active');
+
+            // Scroll suave a la preview
+            document.getElementById('previewSection').scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 38: JAVASCRIPT - Función 5          */
+        /* Genera el archivo PDF                       */
+        /* ============================================ */
+        async function generatePDF(location, rackType, nwHostname) {
+            // ✅ CORRECCIÓN: Validar hostname para NW y NW_SPECIAL
+            if ((rackType === 'NW' || rackType === 'NW_SPECIAL') && !nwHostname) {
+                alert('⚠️ Por favor ingresa un Hostname para el formato NW');
+                return;
+            }
+
+            /* ---------------------------------------- */
+            /* PASO 1: Generar el código QR            */
+            /* ---------------------------------------- */
+            // Crea un contenedor temporal para el QR
+            const qrContainer = document.createElement('div');
+            const tempQR = new QRCode(qrContainer, {
+                text: location,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Esperar a que se genere el QR
+            await new Promise(resolve => setTimeout(resolve, 100));
+            // Obtiene la imagen del QR como Data URL
+            const qrImage = qrContainer.querySelector('img');
+            const qrDataURL = qrImage.src;
+
+            /* ---------------------------------------- */
+            /* PASO 2: Crear el documento PDF          */
+            /* ---------------------------------------- */
+            const { jsPDF } = window.jspdf;
+
+            // Crea un PDF en orientación horizontal de 178mm x 18mm
+            const doc = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: [18, 178]
+            });
+
+            /* ---------------------------------------- */
+            /* PASO 3: Definir color de fondo          */
+            /* ---------------------------------------- */
+            let bgColor = [255, 255, 255]; // Blanco por defecto
+
+            /* ---------------------------------------- */
+            /* PASO 4: Dibujar el fondo                */
+            /* ---------------------------------------- */
+            doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+            doc.rect(0, 0, 178, 18, 'F');
+
+            /* ---------------------------------------- */
+            /* PASO 5: Insertar el código QR           */
+            /* ---------------------------------------- */
+            doc.addImage(qrDataURL, 'PNG', 2.5, 2.5, 14, 14);
+
+            /* ---------------------------------------- */
+            /* PASO 6: Dibujar línea después del QR    */
+            /* ---------------------------------------- */
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.5);
+            doc.line(19, 2, 19, 16);
+
+            /* ---------------------------------------- */
+            /* PASO 7: Configurar fuente               */
+            /* ---------------------------------------- */
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+
+            /* ---------------------------------------- */
+            /* PASO 8: Agregar texto (formato NW o normal) */
+            /* ---------------------------------------- */
+            // ✅ CORRECCIÓN: Incluir NW_SPECIAL en la condición
+            if ((rackType === 'NW' || rackType === 'NW_SPECIAL') && nwHostname) {
+                // Formato especial NW con dos líneas y línea divisoria
+                doc.setFontSize(21);
+                // Calcular el espacio disponible
+                const textStartX = 21;  // Después de la línea del QR
+                const textEndX = 138;   // Antes de la línea del tipo de red
+                const availableWidth = textEndX - textStartX;  // 117mm de espacio
+
+                // Primera línea (ubicación) - CENTRADA
+                const locationWidth = doc.getTextWidth(location);
+                const locationX = textStartX + (availableWidth - locationWidth) / 2;
+                doc.text(location, locationX, 7);
+
+                // Línea divisoria horizontal
+                doc.setLineWidth(0.3);
+                doc.line(21, 9, 138, 9);
+
+                // Segunda línea (hostname) - CENTRADA
+                const hostnameWidth = doc.getTextWidth(nwHostname);
+                const hostnameX = textStartX + (availableWidth - hostnameWidth) / 2;
+                doc.text(nwHostname, hostnameX, 16);
+
+            } else {
+                // Formato normal - texto CENTRADO y MÁS GRANDE
+                doc.setFontSize(30);
+                const textWidth = doc.getTextWidth(location);
+                const availableWidth = 152 - 19;  // Espacio para el texto
+                const xPos = 16 + (availableWidth - textWidth) / 2; // Centrado en 26mm
+                doc.text(location, xPos, 12.5);
+            }
+
+            /* ---------------------------------------- */
+            /* PASO 9: Línea antes del tipo de red     */
+            /* ---------------------------------------- */
+            doc.setLineWidth(0.5);
+            doc.line(147, 2, 147, 16);
+
+            /* ---------------------------------------- */
+            /* PASO 10: Agregar tipo de red (EC2, PROD, etc) */
+            /* ---------------------------------------- */
+            doc.setFontSize(28);
+            // ✅ CORRECCIÓN: Mostrar "NW" para NW, NW_SPECIAL y NW PATH
+            const typeText = (rackType === 'NW PATH' || rackType === 'NW' || rackType === 'NW_SPECIAL') ? 'NW' : rackType;
+            const typeWidth = doc.getTextWidth(typeText);
+            const typeX = 149 + (26 - typeWidth) / 2;  // 26mm de ancho para PROD
+            doc.text(typeText, typeX, 12.5);
+
+            /* ---------------------------------------- */
+            /* PASO 11: Guardar el PDF                 */
+            /* ---------------------------------------- */
+            // Descargar PDF
+            const filename = `rack-label-${location.replace(/\//g, '-')}-${rackType.replace(/ /g, '-')}.pdf`;
+            doc.save(filename);
+
+            /* ---------------------------------------- */
+            /* PASO 12: Mostrar mensaje de éxito       */
+            /* ---------------------------------------- */
+            alert(`✅ Etiqueta generada exitosamente!\n\nArchivo: ${filename}\nUbicación: ${location}\nTipo: ${rackType}\n\nDimensiones: 178mm x 18mm\nLista para imprimir en Brother`);
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 38B: JAVASCRIPT - Función 6         */
+        /* Imprime la etiqueta directamente            */
+        /* ============================================ */
+        async function printLabel(location, rackType, nwHostname) {
+            // ✅ CORRECCIÓN: Validar hostname para NW y NW_SPECIAL
+            if ((rackType === 'NW' || rackType === 'NW_SPECIAL') && !nwHostname) {
+                alert('⚠️ Por favor ingresa un Hostname para el formato NW');
+                return;
+            }
+
+            /* ---------------------------------------- */
+            /* PASO 1: Generar el código QR            */
+            /* ---------------------------------------- */
+            const qrContainer = document.createElement('div');
+            const tempQR = new QRCode(qrContainer, {
+                text: location,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Esperar a que se genere el QR
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const qrImage = qrContainer.querySelector('img');
+            const qrDataURL = qrImage.src;
+
+            /* ---------------------------------------- */
+            /* PASO 2: Crear el documento PDF          */
+            /* ---------------------------------------- */
+            const { jsPDF } = window.jspdf;
+
+            const doc = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: [18, 178]
+            });
+
+            /* ---------------------------------------- */
+            /* PASO 3: Definir color de fondo          */
+            /* ---------------------------------------- */
+            let bgColor = [255, 255, 255]; // Blanco por defecto
+
+            /* ---------------------------------------- */
+            /* PASO 4: Dibujar el fondo                */
+            /* ---------------------------------------- */
+            doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+            doc.rect(0, 0, 178, 18, 'F');
+
+            /* ---------------------------------------- */
+            /* PASO 5: Insertar el código QR           */
+            /* ---------------------------------------- */
+            doc.addImage(qrDataURL, 'PNG', 2.5, 2.5, 14, 14);
+
+            /* ---------------------------------------- */
+            /* PASO 6: Dibujar línea después del QR    */
+            /* ---------------------------------------- */
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.5);
+            doc.line(19, 2, 19, 16);
+
+            /* ---------------------------------------- */
+            /* PASO 7: Configurar fuente               */
+            /* ---------------------------------------- */
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+
+            /* ---------------------------------------- */
+            /* PASO 8: Agregar texto (formato NW o normal) */
+            /* ---------------------------------------- */
+            // ✅ CORRECCIÓN: Incluir NW_SPECIAL en la condición
+            if ((rackType === 'NW' || rackType === 'NW_SPECIAL') && nwHostname) {
+                // Formato especial NW con dos líneas y línea divisoria
+                doc.setFontSize(21);
+                const textStartX = 21;
+                const textEndX = 138;
+                const availableWidth = textEndX - textStartX;
+
+                // Primera línea (ubicación) - CENTRADA
+                const locationWidth = doc.getTextWidth(location);
+                const locationX = textStartX + (availableWidth - locationWidth) / 2;
+                doc.text(location, locationX, 7);
+
+                // Línea divisoria horizontal
+                doc.setLineWidth(0.3);
+                doc.line(21, 9, 138, 9);
+
+                // Segunda línea (hostname) - CENTRADA
+                const hostnameWidth = doc.getTextWidth(nwHostname);
+                const hostnameX = textStartX + (availableWidth - hostnameWidth) / 2;
+                doc.text(nwHostname, hostnameX, 16);
+
+            } else {
+                // Formato normal - texto CENTRADO y MÁS GRANDE
+                doc.setFontSize(30);
+                const textWidth = doc.getTextWidth(location);
+                const availableWidth = 152 - 19;
+                const xPos = 16 + (availableWidth - textWidth) / 2;
+                doc.text(location, xPos, 12.5);
+            }
+
+            /* ---------------------------------------- */
+            /* PASO 9: Línea antes del tipo de red     */
+            /* ---------------------------------------- */
+            doc.setLineWidth(0.5);
+            doc.line(147, 2, 147, 16);
+
+            /* ---------------------------------------- */
+            /* PASO 10: Agregar tipo de red            */
+            /* ---------------------------------------- */
+            doc.setFontSize(28);
+            // ✅ CORRECCIÓN: Mostrar "NW" para NW, NW_SPECIAL y NW PATH
+            const typeText = (rackType === 'NW PATH' || rackType === 'NW' || rackType === 'NW_SPECIAL') ? 'NW' : rackType;
+            const typeWidth = doc.getTextWidth(typeText);
+            const typeX = 149 + (26 - typeWidth) / 2;
+            doc.text(typeText, typeX, 12.5);
+
+            /* ---------------------------------------- */
+            /* PASO 11: IMPRIMIR (en lugar de guardar) */
+            /* ---------------------------------------- */
+            // Configurar para auto-imprimir
+            doc.autoPrint();
+
+            // Abrir en una nueva ventana para imprimir
+            const pdfBlob = doc.output('bloburl');
+            const printWindow = window.open(pdfBlob, '_blank');
+
+            // Esperar a que se cargue y luego imprimir
+            if (printWindow) {
+                printWindow.onload = function () {
+                    printWindow.print();
+                };
+            } else {
+                alert('⚠️ Por favor permite las ventanas emergentes para imprimir');
+            }
+
+            /* ---------------------------------------- */
+            /* PASO 12: Mensaje en consola             */
+            /* ---------------------------------------- */
+            console.log(`🖨️ Enviando a imprimir: ${location} - ${rackType}`);
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 38C: JAVASCRIPT - Función 7         */
+        /* Restablecer formulario                      */
+        /* ============================================ */
+        function resetForm() {
+            // ========================================
+            // 1. RESTABLECER CLUSTER Y SITE
+            // ========================================
+            document.getElementById('cluster').value = '';
+            document.getElementById('site').value = '';
+            document.getElementById('site').disabled = true;
+
+            // ========================================
+            // 2. RESTABLECER CAMPOS DE UBICACIÓN
+            // ========================================
+            document.getElementById('building').value = '1';
+            document.getElementById('floor').value = '1';
+            document.getElementById('room').value = '01';
+            document.getElementById('row').value = '001';
+            document.getElementById('position').value = '11';
+            document.getElementById('side').value = 'A-B';
+
+            // ========================================
+            // 3. RESTABLECER TIPO DE RACK
+            // ========================================
+            document.getElementById('rackType').value = 'EC2';
+
+            // ========================================
+            // 4. LIMPIAR HOSTNAME MANUAL (NW)
+            // ========================================
+            document.getElementById('nwHostname').value = '';
+
+            // ========================================
+            // 5. LIMPIAR SELECTOR DE RACK (NW_SPECIAL)
+            // ========================================
+            document.getElementById('nwSpecialRack').value = '';  // ✅ Vuelve a "-- Selecciona un rack --"
+
+            // ========================================
+            // 6. OCULTAR CAMPOS CONDICIONALES
+            // ========================================
+            const hostnameGroup = document.getElementById('nwHostnameGroup');
+            const specialRackGroup = document.getElementById('nwSpecialRackGroup');
+
+            if (hostnameGroup) {
+                hostnameGroup.style.display = 'none';
+            }
+
+            if (specialRackGroup) {
+                specialRackGroup.style.display = 'none';
+            }
+
+            // ========================================
+            // 7. OCULTAR VISTA PREVIA
+            // ========================================
+            const previewSection = document.querySelector('.preview-section');
+            if (previewSection) {
+                previewSection.classList.remove('active');
+            }
+
+            // ========================================
+            // 8. LIMPIAR CONTENEDOR DE ETIQUETAS
+            // ========================================
+            const labelsContainer = document.getElementById('labelsContainer');
+            if (labelsContainer) {
+                labelsContainer.innerHTML = '';
+            }
+
+            // ========================================
+            // 9. SCROLL HACIA ARRIBA
+            // ========================================
+            window.scrollTo({ top: 0 });
+        }
+
+        /* ============================================ */
+        /* SECCIÓN 39: JAVASCRIPT - Inicialización     */
+        /* Se ejecuta cuando la página termina de cargar */
+        /* ============================================ */
+        window.onload = function () {
+
+            resetForm();
+        };
+
+
+
+    </script>
+    <footer class="page-footer-minimal">
+        <p>Created by <strong>alnardog</strong> • DCO Tech 3 • SCL • v1.0 | © 2026 | Amazon Data Center Operations</p>
+        <p>For support or feedback: <a href="mailto:alnardog@amazon.com">alnardog@amazon.com</a></p>
+
+    </footer>
+
+</body>
+
+</html>
